@@ -1,0 +1,13 @@
+aee34c6f30fc979dd1a631515914af59e2ac6be49e7cd6ecd3e11197e3716aa1  src/test/java/uoc/ds/pr/ArchitectureTest.java
+9d81cc2603abf2ddf46163637d716e708813fba4b4e1dfe73f351b39225a1e52  src/test/java/uoc/ds/pr/pr2/BrowserPR2Test.java
+a7cc395f8183047e66e4b451992fd4327a7602aaa710a3781fc742708e2a9a7e  src/test/java/uoc/ds/pr/pr2/FactoryBrowser.java
+af7e036cfa7124d43a0675e619419a51cdf96def41f5eba6c8154c4ae382b5c6  src/test/java/uoc/ds/pr/pr2/NavigationHistoryTest.java
+c0807933024b66a583c44e3f63234d4540802e0abd61d12e04e27828eb558bc7  src/test/java/uoc/ds/pr/util/CSVDataLoader.java
+6b73caafa07ee6d06634651c36cabcf63e35ed57e77e1f46f444801da2fda5e4  src/test/java/uoc/ds/pr/util/CSVUtil.java
+0f1f748c198a2e0adea47d66dde0d24198ba263f5fb3bf2b176ba9c9c29313c5  src/test/java/uoc/ds/pr/util/DNSResolverTest.java
+2ce865e54f0e7dc8bb35c052f941c73cca3582df9e46028236f50a0e2339dc14  src/test/java/uoc/ds/pr/util/DateUtils.java
+da0176e62f68029e9df41b8d4572701711687ededb759b7fc69f5dad252839f8  src/test/java/uoc/ds/pr/util/StackLinkedListTest.java
+3509d9945c05db89224046e3cf33be1088c98a0fcaf5b258960b436b52876fc2  src/test/resources/bookmarks.csv
+1dbd7f07ef23e030fecd1bf4e0fcf8dad381810233029e363dce4c9a31eefce3  src/test/resources/dns_entries.csv
+0520120b2778fe2a1d3a3fa525b6da147f8d4f6a304148d44eb7de4c2290560b  src/test/resources/user-accounts.csv
+aa83c0761a93e5a057e7ee343761fff8f7e691e771f6d67d553607493fa8517b  src/test/resources/web_visits.csv
