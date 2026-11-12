@@ -15,16 +15,22 @@ public class UserProfile {
     //Informació de navegació de l'usuari
 
     //Marcadors
-    private LinkedList<Bookmark> bookmarks;
+    private final LinkedList<Bookmark> bookmarks;
 
     //Historial de navegació
-    private LinkedList<HistoryWebPage> history;
+    private final LinkedList<HistoryWebPage> history;
 
     //Configuració
-    private ConfigurationOption[] configurations;
+    private final ConfigurationOption[] configurations;
 
     //Extensions
-    private LinkedList<Extension> extensions;
+    private final LinkedList<Extension> extensions;
+
+    //Historial de navegació
+    private final NavigationHistory navigationHistory;
+
+    //Pàgina més visitada per l'usuari
+    private HistoryWebPage mostVisitedWebPage;
 
     //Constructor
     public UserProfile(String userId, String name, String user, String pass){
@@ -36,6 +42,8 @@ public class UserProfile {
         this.history = new LinkedList<>();
         this.configurations = new ConfigurationOption[Browser.MAX_CONFIGURATIONS];
         this.extensions = new LinkedList<>();
+        this.navigationHistory = new NavigationHistory();
+        this.mostVisitedWebPage = null;
     }
 
     //Getters

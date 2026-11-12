@@ -7,9 +7,9 @@ public class WebPage {
     private int visits;
 
     //Constructor
-    public WebPage(String url, int visits){
+    public WebPage(String url) {
         this.url = url;
-        this.visits = visits;
+        this.visits = 0;
     }
 
     //Getter
