@@ -63,6 +63,30 @@ public class UserProfile {
         return pass;
     }
 
+    public LinkedList<Bookmark> getBookmarks() {
+        return bookmarks;
+    }
+
+    public LinkedList<HistoryWebPage> getHistory() {
+        return history;
+    }
+
+    public ConfigurationOption[] getConfigurations() {
+        return configurations;
+    }
+
+    public LinkedList<Extension> getExtensions() {
+        return extensions;
+    }
+
+    public NavigationHistory getNavigationHistory() {
+        return navigationHistory;
+    }
+
+    public HistoryWebPage getMostVisitedWebPage() {
+        return mostVisitedWebPage;
+    }
+
     //Setters
     public void setName(String name) {
         this.name = name;

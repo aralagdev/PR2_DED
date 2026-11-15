@@ -72,4 +72,9 @@ public class DNSResolver {
         }
     }
 
+    //Obtenim el numero d'entrades DNS
+    public int numDNSEntries() {
+        return dnsEntries.size();
+    }
+
 }
