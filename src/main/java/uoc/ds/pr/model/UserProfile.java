@@ -100,4 +100,8 @@ public class UserProfile {
         this.pass = pass;
     }
 
+    public void setMostVisitedWebPage(HistoryWebPage mostVisitedWebPage) {
+        this.mostVisitedWebPage = mostVisitedWebPage;
+    }
+
 }

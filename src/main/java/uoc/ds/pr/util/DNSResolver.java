@@ -53,7 +53,7 @@ public class DNSResolver {
     //Obtenir el host d'una URL
     public static String extractHost(String url){
         //Comprovem la url
-        if(url == null | url.isEmpty()){
+        if(url == null || url.isEmpty()){
             return null;
         }
 

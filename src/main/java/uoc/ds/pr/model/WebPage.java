@@ -21,8 +21,9 @@ public class WebPage {
         return visits;
     }
 
-    //Incrementem les visites
-    public void incrementVisits(){
+    // Incrementar visites
+    public void incrementVisits() {
         visits++;
     }
+
 }

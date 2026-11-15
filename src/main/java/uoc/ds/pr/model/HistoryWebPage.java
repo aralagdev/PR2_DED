@@ -2,28 +2,20 @@ package uoc.ds.pr.model;
 
 import java.time.LocalDateTime;
 
-public class HistoryWebPage {
+public class HistoryWebPage extends WebPage {
 
     //Atributs
-    private WebPage webPage;
     private LocalDateTime dateTime;
 
     //Constructor
-    public HistoryWebPage(WebPage webPage, LocalDateTime dateTime){
-        this.webPage = webPage;
+    public HistoryWebPage(String url, LocalDateTime dateTime){
+        super(url);
         this.dateTime = dateTime;
     }
 
     //Getters
-    public String getUrl(){
-        return webPage.getUrl();
-    }
-
     public LocalDateTime getDateTime() {
         return dateTime;
     }
 
-    public WebPage getWebPage(){
-        return webPage;
-    }
 }

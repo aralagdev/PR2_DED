@@ -1,26 +1,21 @@
 package uoc.ds.pr.model;
 
-public class Bookmark {
+public class Bookmark extends WebPage{
 
     //Atributs
     private String title;
-    private String url;
     private String path;
 
     //Constructor
     public Bookmark(String title, String url, String path){
+        super(url);
         this.title = title;
-        this.url = url;
         this.path = path;
     }
 
     //Getters
     public String getTitle(){
         return title;
-    }
-
-    public String getUrl(){
-        return url;
     }
 
     public String getPath(){

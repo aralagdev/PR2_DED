@@ -26,7 +26,7 @@ public class NavigationHistory {
     }
 
     //Visitar una pàgina
-    public void visit(String url){
+    public void visit(WebPage webPage){
 
         //La pàgina actual es enviada a la pila de retrocés
         if(currentPage != null){
@@ -34,13 +34,19 @@ public class NavigationHistory {
         }
 
         //Es crea la nova pàgina actual
-        currentPage = new WebPage(url);
+        currentPage = webPage;
 
         //Buidem la pila d'avançament
         while(!forwardStack.isEmpty()){
             forwardStack.pop();
         }
     }
+
+    public void visit(String url) {
+        visit(new WebPage(url));
+    }
+
+
 
     //Navegació de retrocés
     public WebPage back(){

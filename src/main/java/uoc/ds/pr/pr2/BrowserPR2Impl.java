@@ -1,9 +1,11 @@
 package uoc.ds.pr.pr2;
+import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.traversal.Iterator;
-import uoc.ds.pr.exceptions.ExtensionNotFoundException;
-import uoc.ds.pr.exceptions.UserProfileNotFoundException;
+import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
 import uoc.ds.pr.util.DNSResolver;
+
+import java.time.LocalDateTime;
 
 public class BrowserPR2Impl implements Browser, BrowserHelper{
 
@@ -11,13 +13,25 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
     private UserProfile[] userProfiles;
     private int totalUsers;
 
+    //Total d'extensions
+    private int totalExtensions;
+
+    //Pàgina web més visitada
+    private WebPage mostVisitedWebPage;
+
+    //Pàgines web
+    private LinkedList<WebPage> webPages;
+
     //Eina DNS
     private DNSResolver dnsResolver;
 
     public BrowserPR2Impl(){
         userProfiles = new UserProfile[MAX_USERS_ACCOUNTS];
         totalUsers = 0;
+        totalExtensions = 0;
         dnsResolver = new DNSResolver();
+        mostVisitedWebPage = null;
+        webPages = new LinkedList<>();
     }
 
     //Afegim un perfil d'usuari nou
@@ -35,10 +49,11 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
             userprofile.setPass(pass);
         } else {
             //Si no existeix, creem un perfil nou
-            userProfiles[totalUsers] = new UserProfile(userId, name, user, pass);
-            totalUsers++;
+            if (totalUsers < MAX_USERS_ACCOUNTS) {
+                userProfiles[totalUsers] = new UserProfile(userId, name, user, pass);
+                totalUsers++;
+            }
         }
-
     }
 
     //Afegir un nou marcador a l'usuari
@@ -52,9 +67,17 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
             throw new UserProfileNotFoundException("User profile " + userId + " not found");
         }
 
-        //Creem el marcador i l'afegim als marcadors de l'usuari
-        Bookmark bookmark = new Bookmark(title, url, path);
-        userProfile.getBookmarks().insertEnd(bookmark);
+        //Obtenim el marcador
+        Bookmark bookmark = getBookmark(userId, url);
+
+        //Si el trobem l'actualitzem, sinó l'afegim
+        if (bookmark != null) {
+            bookmark.setTitle(title);
+            bookmark.setPath(path);
+        } else {
+            bookmark = new Bookmark(title, url, path);
+            userProfile.getBookmarks().insertEnd(bookmark);
+        }
 
     }
 
@@ -69,12 +92,27 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
             throw new UserProfileNotFoundException("User profile " + userId + " not found");
         }
 
-        //Obtenim la opció segons id
+        //Cerquem la configuració
         ConfigurationOption confOpt = getConfigurationOption(userId, coId);
 
-        //Actualitzem la opció
-        confOpt.setProperty(property);
-        confOpt.setValue(value);
+        if (confOpt == null) {
+            // Si no existeix, la creem
+            confOpt = new ConfigurationOption(coId, property, value);
+
+            ConfigurationOption[] configurations = userProfile.getConfigurations();
+
+            //L'afegim a un espai disponible
+            for (int i = 0; i < configurations.length; i++) {
+                if (configurations[i] == null) {
+                    configurations[i] = confOpt;
+                    return;
+                }
+            }
+        } else {
+            // Si existeix, l'actualitzem
+            confOpt.setProperty(property);
+            confOpt.setValue(value);
+        }
     }
 
     //Afegeix una extensió i l'assocía amb un usuari
@@ -94,6 +132,7 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
         //Si l'extensió existeix, s'actualitza. Sinó, es crea
         if(extension == null){
             extension = new Extension(extensionId, name, packagePath, version);
+            totalExtensions++;
         } else {
             extension.updateExtension(name, packagePath, version);
         }
@@ -117,6 +156,7 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
     }
 
     //Afegeix un comentari a l'extensió d'un usuari
+    @Override
     public void addCommentToExtension(String extensionId, String userId, String comment) throws UserProfileNotFoundException, ExtensionNotFoundException{
         //Obtenim el perfil d'usuari
         UserProfile userProfile = getUserProfile(userId);
@@ -135,9 +175,174 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
         }
 
         extension.addComment(comment);
+    }
+
+
+
+    //Visita una pàgina web
+    @Override
+    public void visitWeb(String userId, String url, LocalDateTime dateTime) throws UserProfileNotFoundException, DNSResolverException {
+        //Obtenim el perfil d'usuari
+        UserProfile userProfile = getUserProfile(userId);
+
+        //Si no existeix retornem una excepció
+        if(userProfile == null){
+            throw new UserProfileNotFoundException("User profile " + userId + " not found");
+        }
+
+        //Extraiem el host de la URL
+        String host = DNSResolver.extractHost(url);
+
+        //Comprovem l'existència al DNS
+        DNSEntry dnsEntry = dnsResolver.getDNSEntry(host);
+
+        //Si no la trovem llançem una excepció
+        if(dnsEntry == null){
+            throw new DNSResolverException("DNS entry " + host + " not found");
+        }
+
+        //Busquem la pàgina a la llista global
+        WebPage webPage = getWebPage(url);
+
+        //Si no existeix, la creem i l'afegim
+        if (webPage == null) {
+            webPage = new WebPage(url);
+            webPages.insertEnd(webPage);
+        }
+
+        //Incrementem el nombre global de visites
+        webPage.incrementVisits();
+
+        //Creem una entrada individual a l'historial
+        HistoryWebPage historyWebPage = new HistoryWebPage(url, dateTime);
+
+        //Afegim la visita a l'historial de l'usuari
+        userProfile.getHistory().insertEnd(historyWebPage);
+
+        // Actualitzem l'historial de navegació
+        userProfile.getNavigationHistory().visit(historyWebPage);
+
+        // Actualitzem la pàgina més visitada de l'usuari
+        int userVisits = numVisitsUser(userProfile, url);
+
+        if (userProfile.getMostVisitedWebPage() == null ||
+                userVisits > numVisitsUser(
+                        userProfile,
+                        userProfile.getMostVisitedWebPage().getUrl())) {
+
+            userProfile.setMostVisitedWebPage(historyWebPage);
+        }
+
+        // Actualitzem la pàgina més visitada globalment
+        if (mostVisitedWebPage == null ||
+                webPage.getVisits() > mostVisitedWebPage.getVisits()) {
+
+            mostVisitedWebPage = webPage;
+        }
 
     }
 
+    //Navegació cap enrere
+    @Override
+    public WebPage backWeb(String userId) throws UserProfileNotFoundException{
+        //Obtenim el perfil d'usuari
+        UserProfile userProfile = getUserProfile(userId);
+
+        //Si no existeix retornem una excepció
+        if(userProfile == null){
+            throw new UserProfileNotFoundException("User profile " + userId + " not found");
+        }
+
+        //Retrocedim a l'historial de navegació
+        return userProfile.getNavigationHistory().back();
+    }
+
+    //Navegació cap endevant
+    @Override
+    public WebPage forwardWeb(String userId) throws UserProfileNotFoundException{
+        //Obtenim el perfil d'usuari
+        UserProfile userProfile = getUserProfile(userId);
+
+        //Si no existeix retornem una excepció
+        if(userProfile == null){
+            throw new UserProfileNotFoundException("User profile " + userId + " not found");
+        }
+
+        //Retrocedim a l'historial de navegació
+        return userProfile.getNavigationHistory().forward();
+    }
+
+    //Retora la pàgina més visitada globalment
+    @Override
+    public WebPage getMostVisitedWeb() throws NoWebPagesFoundException {
+        if(mostVisitedWebPage == null){
+            throw new NoWebPagesFoundException();
+        }
+
+        return mostVisitedWebPage;
+    }
+
+    //Retora la pàgina més visitada per l'usuari
+    @Override
+    public WebPage getMostVisitedWebByUser(String userId) throws UserProfileNotFoundException, NoWebPagesFoundException {
+        //Obtenim el perfil d'usuari
+        UserProfile userProfile = getUserProfile(userId);
+
+        //Si no existeix retornem una excepció
+        if(userProfile == null){
+            throw new UserProfileNotFoundException("User profile " + userId + " not found");
+        }
+
+        if(userProfile.getMostVisitedWebPage() == null){
+            throw new NoWebPagesFoundException();
+        }
+
+        return userProfile.getMostVisitedWebPage();
+    }
+
+    //Retorna l'historial d'un usuari concret
+    @Override
+    public Iterator<HistoryWebPage> getHistoryWebsByUser(String userId) throws UserProfileNotFoundException, NoHistoryFoundException{
+        //Obtenim el perfil d'usuari
+        UserProfile userProfile = getUserProfile(userId);
+
+        //Si no existeix retornem una excepció
+        if(userProfile == null){
+            throw new UserProfileNotFoundException("User profile " + userId + " not found");
+        }
+
+        //Si no té historial, retornem una excepció
+        if(userProfile.getHistory().isEmpty()){
+            throw new NoHistoryFoundException();
+        }
+
+        return userProfile.getHistory().values();
+    }
+
+    //Retorna els marcadors d'un usuari concret
+    @Override
+    public Iterator<Bookmark> getAllBookmarksByUser(String userId) throws UserProfileNotFoundException, NoBookmarksFoundException{
+        //Obtenim el perfil d'usuari
+        UserProfile userProfile = getUserProfile(userId);
+
+        //Si no existeix retornem una excepció
+        if(userProfile == null){
+            throw new UserProfileNotFoundException("User profile " + userId + " not found");
+        }
+
+        //Si no té historial, retornem una excepció
+        if(userProfile.getBookmarks().isEmpty()){
+            throw new NoBookmarksFoundException();
+        }
+
+        return userProfile.getBookmarks().values();
+    }
+
+    //Retorna el nombre total de comptes d'usuari
+    @Override
+    public int getTotalUsersAccounts() {
+        return totalUsers;
+    }
 
     @Override
     public BrowserHelper getHelper() {
@@ -249,15 +454,7 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
 
     //Obtenim el nombre d'extensions de tots els usuaris
     public int numExtensions(){
-        int numExtTotal = 0;
-        int numExUser = 0;
-        //Comptem el nombre d'extensions de cada usuari i sumem al total
-        for(int i = 0; i < totalUsers; i++){
-            numExUser = userProfiles[i].getExtensions().size();
-            numExtTotal = numExtTotal + numExUser;
-        }
-
-        return numExtTotal;
+        return totalExtensions;
     }
 
     //Busquem una extensió segons el seu id
@@ -298,7 +495,7 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
         return extension.countComments();
     }
 
-    //Retorna el nombre d'entradade a l'historial de l'usuari segons id
+    //Retorna el nombre d'entrada a l'historial de l'usuari segons id
     @Override
     public int numHistoryByUser(String userId){
         //Obtenim l'usuari
@@ -340,6 +537,56 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
         return dnsResolver.numDNSEntries();
     }
 
+
+    //MÈTODES AUXILIARS
+
+    //Cerca una pàgina web
+    private WebPage getCreateWebPage(String url){
+        Iterator<WebPage> it = webPages.values();
+
+        //Cerquem la web per la seva url i al retornem
+        while(it.hasNext()){
+            WebPage webPage = it.next();
+            if(webPage.getUrl().equals(url)){
+                return webPage;
+            }
+        }
+
+        //Si no la trobem la creem i afegim a la llista
+        WebPage webPage = new WebPage(url);
+        webPages.insertEnd(webPage);
+        return  webPage;
+    }
+
+    //Comptar les visites de l'usuari
+    private int numVisitsUser(UserProfile userProfile, String url){
+        int visits = 0;
+        Iterator<HistoryWebPage> it = userProfile.getHistory().values();
+
+        while (it.hasNext()) {
+            HistoryWebPage historyWebPage = it.next();
+
+            if (historyWebPage.getUrl().equals(url)) {
+                visits++;
+            }
+        }
+
+        return visits;
+    }
+
+    private WebPage getWebPage(String url) {
+        Iterator<WebPage> it = webPages.values();
+
+        while (it.hasNext()) {
+            WebPage webPage = it.next();
+
+            if (webPage.getUrl().equals(url)) {
+                return webPage;
+            }
+        }
+
+        return null;
+    }
 
 
 }
