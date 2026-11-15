@@ -32,7 +32,7 @@ public class DNSResolver {
         while (iteratorDNSEntry.hasNext()){
             DNSEntry entry = iteratorDNSEntry.next();
 
-            if(entry.getHost().equals(host)){
+            if (entry.getHost().equalsIgnoreCase(host)) {
                 return entry;
             }
         }
@@ -61,7 +61,9 @@ public class DNSResolver {
             String entireUrl = url;
 
             //Afegim el protocol http si és necessari
-            if(!url.startsWith("http://") && !url.startsWith("https://")) {
+            if (!url.regionMatches(true, 0, "http://", 0, 7) &&
+                    !url.regionMatches(true, 0, "https://", 0, 8)) {
+
                 entireUrl = "https://" + url;
             }
 

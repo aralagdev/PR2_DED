@@ -10,7 +10,7 @@ public class Extension {
     private String version;
 
     //Llista enllaçada de comentaris
-    private LinkedList<String> comments;
+    private final LinkedList<String> comments;
 
     //Constructor
     public Extension(String extensionId, String name, String packagePath, String version){

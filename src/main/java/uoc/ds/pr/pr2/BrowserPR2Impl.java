@@ -540,24 +540,6 @@ public class BrowserPR2Impl implements Browser, BrowserHelper{
 
     //MÈTODES AUXILIARS
 
-    //Cerca una pàgina web
-    private WebPage getCreateWebPage(String url){
-        Iterator<WebPage> it = webPages.values();
-
-        //Cerquem la web per la seva url i al retornem
-        while(it.hasNext()){
-            WebPage webPage = it.next();
-            if(webPage.getUrl().equals(url)){
-                return webPage;
-            }
-        }
-
-        //Si no la trobem la creem i afegim a la llista
-        WebPage webPage = new WebPage(url);
-        webPages.insertEnd(webPage);
-        return  webPage;
-    }
-
     //Comptar les visites de l'usuari
     private int numVisitsUser(UserProfile userProfile, String url){
         int visits = 0;
